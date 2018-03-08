@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Reading List</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container" role="main">
+    <div class="jumbotron">
+        <h1>My Reading List</h1>
+
+        <p>Just an example of simple CRUD application developed using Eclipse Vert.x and Vertx Web.</p>
+    </div>
+    <div class="page-header">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Articles</h1>
+                <button class="pull-right btn btn-primary product-add" data-action="add" data-toggle="modal"
+                        data-target="#productModal">
+                    <span class="glyphicon glyphicon-plus"></span> Add a new article
+                </button>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>URL</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="content">
+                    <!-- filled using Ajax -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        load();
+        initModal();
+    });
+
+    function create(title, url) {
+        $.post("/api/articles", JSON.stringify({title: title, url: url}), function () {
+            load();
+        }, "json");
+    }
+
+    function remove(id) {
+        $.ajax({
+            method: "DELETE",
+            url: "/api/articles/" + id
+        }).done(function () {
+            load();
+        });
+    }
+
+    function update(id, title, url) {
+        $.ajax({
+            method: "PUT",
+            url: "/api/articles/" + id,
+            data:  JSON.stringify({title: title, url: url})
+        }).done(function () {
+            load();
+        });
+    }
+
+    function load() {
+        $("#content").children().remove();
+        $.getJSON("/api/articles", function (data) {
+            $.each(data, function (key, val) {
+                $("<tr><td>" + val.id + "</td><td>" + val.title + "</td><td>" +
+                    "<a href='" + val.url + "'>" + val.url + "</a></td>" +
+                    "<td>" +
+                    "<button data-action='edit' class='btn btn-primary btn-sm product-edit' " +
+                    "data-toggle='modal' " +
+                    "data-target='#productModal' " +
+                    "data-title='" + val.title + "' " +
+                    "data-url='" + val.url + "' " +
+                    "data-id='" + val.id + "'>" +
+                    "<span class='glyphicon glyphicon-pencil'></span>" +
+                    "</button>" +
+                    "&nbsp;" +
+                    "<button class='btn btn-danger btn-sm product-delete' data-id='" + val.id + "'>" +
+                    "   <span class='glyphicon glyphicon-minus'></span>" +
+                    "</button>" +
+                    "</td>" +
+                    "</tr>").appendTo("#content");
+            });
+            initCallbacks();
+        });
+    }
+
+    function initCallbacks() {
+        $(".product-delete").unbind().click(function() {
+            var id = $(this).data("id");
+            remove(id);
+        });
+    }
+
+    function initModal() {
+        $("#productModal").on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var action = button.data('action');
+            var id = button.data('id');
+            var productAction = $("#productAction");
+            productAction.unbind();
+            var modal = $(this);
+            if (action === "add") {
+                modal.find('.modal-title').text("Add an article");
+                modal.find('#product-title').val("");
+                modal.find('#product-url').val("");
+                productAction.click(function () {
+                    create($("#product-title").val(), $("#product-url").val());
+                    $('#productModal').modal('toggle');
+                });
+            } else {
+                modal.find('.modal-title').text("Edit an article");
+                modal.find('#product-title').val(button.data("title"));
+                modal.find('#product-url').val(button.data("url"));
+                productAction.click(function () {
+                    update(id, $("#product-title").val(), $("#product-url").val());
+                    $('#productModal').modal('toggle');
+                });
+            }
+        })
+    }
+</script>
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" id="productModalTitle">Add an article</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="product-title" class="control-label">Title:</label>
+                        <input type="text" class="form-control" id="product-title">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-url" class="control-label">URL:</label>
+                        <input type="text" class="form-control" id="product-url">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" id="productAction" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
