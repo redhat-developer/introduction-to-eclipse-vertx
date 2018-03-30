@@ -4,7 +4,7 @@ This repository contains the code developed in the _Introduction to Eclipse Vert
 
 1. [My First Vert.x Application](https://developers.redhat.com/blog/2018/03/13/eclipse-vertx-first-application/)
 2. [Eclipse Vert.x Application Configuration](https://developers.redhat.com/blog/2018/03/22/eclipse-vert-x-application-configuration/)
-3. Some REST with Vert.x - to be published
+3. [Some REST with Vert.x](https://developers.redhat.com/blog/2018/03/29/rest-vert-x/)
 4. Asynchronous data access with Vert.x - to be published
 5. Using Reactive eXtensions with Vert.x - to be published
 6. Deploying Vert.x applications on Kubernetes and OpenShift - to be published
